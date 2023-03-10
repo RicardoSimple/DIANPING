@@ -15,8 +15,10 @@ import javax.annotation.Resource;
 
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static com.hmdp.utils.RedisConstants.CACHE_SHOP_KEY;
+import static com.hmdp.utils.RedisConstants.CACHE_SHOP_TTL;
 
 /**
  * <p>
@@ -44,8 +46,8 @@ public class ShopTypeServiceImpl extends ServiceImpl<ShopTypeMapper, ShopType> i
         }
         // 3.不存在，从数据库查询list
         List<ShopType> typeList = query().orderByAsc("sort").list();
-        // 4.将数据存入redis
-        stringRedisTemplate.opsForValue().set(key,JSONUtil.toJsonStr(typeList));
+        // 4.将数据存入redis，设置超时时间，实现超时剔除
+        stringRedisTemplate.opsForValue().set(key,JSONUtil.toJsonStr(typeList),CACHE_SHOP_TTL, TimeUnit.MINUTES);
         // 5.返回list
         return Result.ok(typeList);
     }
